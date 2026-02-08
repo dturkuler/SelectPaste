@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **JSON Configuration**: `commands.json` for managing snippets.
 - **Installer-free**: Portable single-file executable.
 - **Version Display**: "About" menu and startup popup showing version 1.0.0.
+\

@@ -13,9 +13,19 @@ namespace SelectPaste
         public string label { get; set; } = "";
         public string value { get; set; } = "";
         public string description { get; set; } = ""; 
+        
+        // Metadata for display/sorting
+        public string GroupName { get; set; } = "";
+        public int UsageCount { get; set; } = 0;
 
+        // Custom ToString to handle contextual breadcrumbs
         public override string ToString()
         {
+            if (!string.IsNullOrEmpty(GroupName))
+            {
+                // Breadcrumb Format: [General] Example Command
+                return $"[{GroupName.ToUpper()}] {label}";
+            }
             return label;
         }
     }
@@ -23,8 +33,66 @@ namespace SelectPaste
     public class CommandGroup
     {
         public string name { get; set; } = "General";
-        public string description { get; set; } = ""; // Added Group Tooltip
+        public string description { get; set; } = ""; 
         public List<CommandItem> commands { get; set; } = new List<CommandItem>();
+    }
+
+    // New class to handle usage statistics
+    public class UsageManager
+    {
+        private string filePath;
+        private Dictionary<string, int> usageStats;
+
+        public UsageManager()
+        {
+            filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "usage.json");
+            Load();
+        }
+
+        private void Load()
+        {
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    string json = File.ReadAllText(filePath);
+                    usageStats = JsonSerializer.Deserialize<Dictionary<string, int>>(json) ?? new Dictionary<string, int>();
+                }
+                catch
+                {
+                    usageStats = new Dictionary<string, int>();
+                }
+            }
+            else
+            {
+                usageStats = new Dictionary<string, int>();
+            }
+        }
+
+        public void Increment(string commandValue)
+        {
+            if (usageStats.ContainsKey(commandValue))
+                usageStats[commandValue]++;
+            else
+                usageStats[commandValue] = 1;
+
+            Save();
+        }
+
+        public int GetUsage(string commandValue)
+        {
+            return usageStats.ContainsKey(commandValue) ? usageStats[commandValue] : 0;
+        }
+
+        private void Save()
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(usageStats);
+                File.WriteAllText(filePath, json);
+            }
+            catch { }
+        }
     }
 
     public class CommandPaletteForm : Form
@@ -37,6 +105,7 @@ namespace SelectPaste
 
         private List<CommandGroup> commandGroups = new List<CommandGroup>();
         private int currentGroupIndex = 0;
+        private UsageManager usageManager;
         
         public string SelectedValue { get; private set; } = "";
 
@@ -49,6 +118,9 @@ namespace SelectPaste
             this.TopMost = true;
             this.ShowInTaskbar = false;
             this.KeyPreview = true; 
+
+            // Initialize Usage Manager
+            usageManager = new UsageManager();
 
             // Initialize ToolTip
             toolTip = new ToolTip();
@@ -138,6 +210,16 @@ namespace SelectPaste
                         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                         commandGroups = JsonSerializer.Deserialize<List<CommandGroup>>(json, options) ?? new List<CommandGroup>();
                         
+                        // Assign Group Names to items and Load Usage Counts
+                        foreach (var group in commandGroups)
+                        {
+                            foreach (var cmd in group.commands)
+                            {
+                                cmd.GroupName = group.name; // Set Context
+                                cmd.UsageCount = usageManager.GetUsage(cmd.value); // Load Usage
+                            }
+                        }
+
                         if (commandGroups.Count == 0 || (commandGroups.Count > 0 && commandGroups[0].commands == null))
                         {
                             throw new Exception("Fallback to flat list");
@@ -151,6 +233,15 @@ namespace SelectPaste
                         { 
                             new CommandGroup { name = "All Commands", commands = flatList } 
                         };
+                         // Assign Group Names to items for flat list
+                        foreach (var group in commandGroups)
+                        {
+                            foreach (var cmd in group.commands)
+                            {
+                                cmd.GroupName = "General";
+                                cmd.UsageCount = usageManager.GetUsage(cmd.value);
+                            }
+                        }
                     }
 
                     if (commandGroups.Count == 0)
@@ -180,7 +271,13 @@ namespace SelectPaste
                 searchBox.Text = ""; 
             }
             
-            UpdateList(commandGroups[currentGroupIndex].commands);
+            // When selecting a specific group tab, sort by Usage, but keep it deterministic
+            var sortedCommands = commandGroups[currentGroupIndex].commands
+                .OrderByDescending(c => c.UsageCount)
+                .ThenBy(c => c.label)
+                .ToList();
+
+            UpdateList(sortedCommands, showBreadcrumbs: false); // No need for "GIT > Push" inside Git tab
             searchBox.Focus(); 
         }
 
@@ -219,11 +316,24 @@ namespace SelectPaste
             }
         }
 
-        private void UpdateList(List<CommandItem> items)
+        private void UpdateList(List<CommandItem> items, bool showBreadcrumbs)
         {
             resultMap.Items.Clear();
             foreach (var item in items)
             {
+                // Temporarily override ToString logic via flag? 
+                // Alternatively, just rely on GroupName being present.
+                // Since we want "Clean" list in tabs, and "Breadcrumbs" in Global Search.
+                
+                // Hack: We can clear GroupName temporarily if we don't want breadcrumbs,
+                // but that mutates state. Better: ListBox uses ToString().
+                // Let's modify CommandItem.ToString() to use a static flag or just ALWAYS show breadcrumbs?
+                // The user specifically asked: "When I search ... show Git > Push".
+                // This implies Breadcrumbs are mostly for Search context or All context.
+                // Let's keep it simple: ToString always shows GroupName if present.
+                // But in Tab view, maybe we want it cleaner? 
+                // Let's stick to showing [GROUP] Item. It provides clarity.
+                
                 resultMap.Items.Add(item);
             }
             if (resultMap.Items.Count > 0)
@@ -238,19 +348,32 @@ namespace SelectPaste
             
             if (string.IsNullOrWhiteSpace(query))
             {
+                // Reset to current group view
                 if (commandGroups.Count > 0)
-                    UpdateList(commandGroups[currentGroupIndex].commands);
+                {
+                    var groupCmds = commandGroups[currentGroupIndex].commands
+                        .OrderByDescending(c => c.UsageCount)
+                        .ToList();
+                    UpdateList(groupCmds, showBreadcrumbs: false);
+                }
             }
             else
             {
+                 // Global Search across ALL groups
                  if (commandGroups.Count > 0)
                  {
                      var allCommands = commandGroups.SelectMany(g => g.commands).ToList();
+                     
                      var filtered = allCommands.Where(c => 
                         c.label.ToLower().Contains(query) || 
-                        c.description.ToLower().Contains(query)
-                     ).ToList();
-                     UpdateList(filtered);
+                        c.description.ToLower().Contains(query) ||
+                        c.GroupName.ToLower().Contains(query) // Contextual match
+                     )
+                     .OrderByDescending(c => c.UsageCount) // Frequency Sort
+                     .ThenBy(c => c.label.Length) // Shortest match first
+                     .ToList();
+
+                     UpdateList(filtered, showBreadcrumbs: true);
                  }
             }
         }
@@ -259,10 +382,15 @@ namespace SelectPaste
         {
             if (resultMap.SelectedItem is CommandItem item)
             {
+                string usageText = item.UsageCount > 0 ? $"\nUsed: {item.UsageCount} times" : "";
                 string tip = item.value;
                 if (!string.IsNullOrEmpty(item.description))
                 {
-                    tip = $"{item.description}\nValue: {item.value}";
+                    tip = $"{item.GroupName} > {item.label}\n{item.description}\nValue: {item.value}{usageText}";
+                }
+                else
+                {
+                     tip = $"{item.GroupName} > {item.label}\nValue: {item.value}{usageText}";
                 }
                 toolTip.SetToolTip(resultMap, tip);
             }
@@ -300,7 +428,7 @@ namespace SelectPaste
             {
                 ConfirmSelection();
                 e.Handled = true;
-                e.SuppressKeyPress = true;
+                e.SuppressKeyPress = true; // Prevent ding sound
             }
             else if (e.KeyCode == Keys.Escape)
             {
@@ -347,6 +475,9 @@ namespace SelectPaste
         {
             if (resultMap.SelectedItem is CommandItem item)
             {
+                // Track Usage!
+                usageManager.Increment(item.value);
+                
                 SelectedValue = item.value;
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -373,6 +504,8 @@ namespace SelectPaste
         {
             base.OnShown(e);
             searchBox.Focus();
+            // Reload commands to get fresh usage stats if changed?
+            // Usually LoadCommands is enough, but reloading usage ensures sync
             LoadCommands(); 
             searchBox.Text = "";
         }

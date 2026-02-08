@@ -87,7 +87,19 @@ namespace SelectPaste
 
         private static string GetVersion()
         {
-            return Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+            // Use InformationalVersion to get the semantic version (e.g. 1.0.1) set in .csproj
+            var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+            var attr = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            
+            // Allow for "1.0.1+commit_hash" standard format, splitting to just get "1.0.1"
+            if (attr?.InformationalVersion != null)
+            {
+                var version = attr.InformationalVersion;
+                int plusIndex = version.IndexOf('+');
+                return plusIndex > 0 ? version.Substring(0, plusIndex) : version;
+            }
+            
+            return assembly.GetName().Version?.ToString(3) ?? "1.0.0";
         }
 
         public class AppSettings
@@ -153,7 +165,7 @@ namespace SelectPaste
 
             private void ShowAbout()
             {
-                var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+                var version = Program.GetVersion();
                 var description = "A keyboard-centric command palette for pasting text.";
                 var repo = "https://github.com/yourusername/SelectPaste"; // Ideally read from assembly attributes
                 
