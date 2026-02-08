@@ -38,9 +38,14 @@ dotnet-install.ps1
 # Commit command.example.json and settings.example.json instead
 settings.json
 commands.json
+usage.json
 
 ## Temporary Folders
 __tobedeleted/
 
 ## Editors
 .vscode/
+
+## Release artifacts
+*.zip
+release/

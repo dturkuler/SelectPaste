@@ -18,17 +18,13 @@ namespace SelectPaste
         public string GroupName { get; set; } = "";
         public int UsageCount { get; set; } = 0;
 
-        // Custom ToString to handle contextual breadcrumbs and value preview
-        public override string ToString()
-        {
-            string groupPrefix = !string.IsNullOrEmpty(GroupName) ? $"[{GroupName.ToUpper()}] " : "";
-            
-            // Preview the value (shortened if too long)
-            string valuePreview = value ?? "";
-            if (valuePreview.Length > 40) valuePreview = valuePreview.Substring(0, 37) + "...";
-            
-            return $"{groupPrefix}{label} -> {valuePreview}";
-        }
+        // Formatted properties for ListBox DisplayMember
+        public string FullDisplay => $"[{GroupName.ToUpper()}] {label} -> {ShortValue}";
+        public string TabDisplay => $"{label} -> {ShortValue}";
+
+        private string ShortValue => (value?.Length > 40) ? value.Substring(0, 37) + "..." : (value ?? "");
+
+        public override string ToString() => FullDisplay;
     }
 
     public class CommandGroup
@@ -320,21 +316,9 @@ namespace SelectPaste
         private void UpdateList(List<CommandItem> items, bool showBreadcrumbs)
         {
             resultMap.Items.Clear();
+            resultMap.DisplayMember = showBreadcrumbs ? "FullDisplay" : "TabDisplay";
             foreach (var item in items)
             {
-                // Temporarily override ToString logic via flag? 
-                // Alternatively, just rely on GroupName being present.
-                // Since we want "Clean" list in tabs, and "Breadcrumbs" in Global Search.
-                
-                // Hack: We can clear GroupName temporarily if we don't want breadcrumbs,
-                // but that mutates state. Better: ListBox uses ToString().
-                // Let's modify CommandItem.ToString() to use a static flag or just ALWAYS show breadcrumbs?
-                // The user specifically asked: "When I search ... show Git > Push".
-                // This implies Breadcrumbs are mostly for Search context or All context.
-                // Let's keep it simple: ToString always shows GroupName if present.
-                // But in Tab view, maybe we want it cleaner? 
-                // Let's stick to showing [GROUP] Item. It provides clarity.
-                
                 resultMap.Items.Add(item);
             }
             if (resultMap.Items.Count > 0)
