@@ -1,0 +1,34 @@
+[
+    {
+        "name": "General",
+        "description": "General Purpose Commands",
+        "commands": [
+            {
+                "label": "My Email",
+                "value": "user@example.com",
+                "description": "Pastes my email address"
+            },
+            {
+                "label": "Signature",
+                "value": "Best regards,\nJohn Doe",
+                "description": "Pastes email signature"
+            }
+        ]
+    },
+    {
+        "name": "Code Snippets",
+        "description": "Common coding patterns",
+        "commands": [
+            {
+                "label": "Console.WriteLine",
+                "value": "Console.WriteLine(\"\");",
+                "description": "C# Print"
+            },
+            {
+                "label": "TODO",
+                "value": "// TODO: ",
+                "description": "Add a todo comment"
+            }
+        ]
+    }
+]

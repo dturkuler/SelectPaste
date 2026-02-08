@@ -1,0 +1,46 @@
+## Visual Studio / .NET Core
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww]in32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+.vs/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Generated files
+[Tt]humbs.db
+[Ee]hthumbs.db
+[Dd]esktop.ini
+
+## Portable .NET Runtime (Local install)
+.dotnet/
+dotnet-install.ps1
+
+## Agent / Local Skills
+.agent/
+.kanbans/
+
+## Local Configuration (Do not commit secrets/personal data)
+# Commit command.example.json and settings.example.json instead
+settings.json
+commands.json
+
+## Temporary Folders
+__tobedeleted/
+
+## Editors
+.vscode/
