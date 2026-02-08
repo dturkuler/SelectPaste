@@ -2,7 +2,7 @@
 
 > A minimal, keyboard-centric command palette for Windows that lets you paste pre-defined text snippets instantly.
 
-![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -11,6 +11,7 @@ SelectPaste is a lightweight utility designed to improve productivity by reducin
 ## 🚀 Key Features
 
 *   **Global Hotkey**: Access your commands from anywhere (Default: `Shift + Alt + .`).
+*   **Resizable & Movable UI**: Drag the edges to resize or the header to move. The app **remembers your preferred layout** automatically.
 *   **Frequency-Based Sorting**: The app learns your habits! Your most-used commands automatically move to the top of the search list.
 *   **Intelligent Search**:
     *   **Tabbed Browsing**: View specific groups (General, Git, Emails) in a clean list.
@@ -59,11 +60,15 @@ Define your snippets here. Structure is a list of groups, each containing a list
 
 ### 2. Settings (`settings.json`)
 
-Customize the global hotkey combination.
+Customize the global hotkey and window state.
 
 ```json
 {
-    "hotkey": "Shift + Alt + ."
+    "hotkey": "Shift + Alt + .",
+    "WindowWidth": 600,
+    "WindowHeight": 400,
+    "WindowX": 100,
+    "WindowY": 100
 }
 ```
 *Supported modifiers: `Ctrl`, `Alt`, `Shift`, `Win`.*
@@ -73,7 +78,7 @@ Customize the global hotkey combination.
 1.  **Launch**: Run `SelectPaste.exe`. Look for a dark "SP" icon in your system tray.
 2.  **Trigger**: Press your hotkey (Default: `Shift + Alt + .`).
 3.  **Search & Select**:
-    *   **Type** to filter commands. Category labels appear automatically during search.
+    *   **Type** to filter commands (filters by label and value). Category labels appear automatically during search.
     *   **Up/Down Arrows** to select a command.
     *   **Left/Right Arrows** to switch between category tabs.
 4.  **Paste**: Press `Enter` to paste the selected snippet into your previous active window.

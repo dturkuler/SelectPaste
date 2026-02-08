@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-02-08
+### Added
+- **Resizable Window**: The command palette is now resizable. Drag any edge or corner to adjust the size.
+- **Persistent Window State**: The app now remembers your custom window size and position across sessions.
+- **Draggable Header**: The palette can be moved by dragging the top tab area.
+- **Search Optimization**: Search now specifically targets labels and values, ignoring descriptions for cleaner results.
+
 ## [1.0.5] - 2026-02-08
 ### Added
 - **Conditional Breadcrumbs**: Category names (e.g., `[GIT]`) now appear instantly during global search but remain hidden when browsing specific tabs for a cleaner look.
