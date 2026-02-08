@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
 using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Text.Encodings.Web;
 
 namespace SelectPaste
 {
@@ -109,6 +111,16 @@ namespace SelectPaste
             public int WindowHeight { get; set; } = 400;
             public int? WindowX { get; set; } = null;
             public int? WindowY { get; set; } = null;
+            
+            // Styling
+            public float FontSize { get; set; } = 10f;
+            public string LabelColor { get; set; } = "#FFFFFF";    // White
+            public string ValueColor { get; set; } = "#888888";    // Gray
+            public string CategoryColor { get; set; } = "#FFA500"; // Orange
+
+            // Preserve unknown fields (like _help)
+            [JsonExtensionData]
+            public Dictionary<string, JsonElement>? ExtensionData { get; set; }
         }
 
         public static void SaveSettings(AppSettings settings)
@@ -117,7 +129,13 @@ namespace SelectPaste
             {
                 string exePath = AppDomain.CurrentDomain.BaseDirectory;
                 string settingsPath = Path.Combine(exePath, "settings.json");
-                var options = new JsonSerializerOptions { WriteIndented = true };
+                
+                var options = new JsonSerializerOptions 
+                { 
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                
                 string json = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(settingsPath, json);
             }

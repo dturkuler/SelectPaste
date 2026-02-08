@@ -2,7 +2,7 @@
 
 > A minimal, keyboard-centric command palette for Windows that lets you paste pre-defined text snippets instantly.
 
-![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.7-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -12,11 +12,12 @@ SelectPaste is a lightweight utility designed to improve productivity by reducin
 
 *   **Global Hotkey**: Access your commands from anywhere (Default: `Shift + Alt + .`).
 *   **Resizable & Movable UI**: Drag the edges to resize or the header to move. The app **remembers your preferred layout** automatically.
+*   **Fully Customizable Styling**: Control font size and colors (labels, values, categories) directly via `settings.json`.
 *   **Frequency-Based Sorting**: The app learns your habits! Your most-used commands automatically move to the top of the search list.
 *   **Intelligent Search**:
     *   **Tabbed Browsing**: View specific groups (General, Git, Emails) in a clean list.
     *   **Contextual Breadcrumbs**: When searching globally, items are marked with their category (e.g., `[GIT]`) so you know exactly what you're pasting.
-*   **Value Preview**: See a preview of the text snippet (`Label -> Value`) right in the search results.
+*   **Value Preview**: See a preview of the text snippet (`Label -> Value`) right in the search results with custom coloring.
 *   **System Tray Integration**: Runs silently in the background with quick access to configuration and controls.
 *   **Portable & Reliable**: No installation required. Just run the `.exe` and it works.
 
@@ -47,31 +48,26 @@ Define your snippets here. Structure is a list of groups, each containing a list
         "description": "Pastes my work email" 
       }
     ]
-  },
-  {
-    "name": "Git",
-    "commands": [
-      { "label": "git status", "value": "git status" },
-      { "label": "git commit", "value": "git commit -m \"\"" }
-    ]
   }
 ]
 ```
 
 ### 2. Settings (`settings.json`)
 
-Customize the global hotkey and window state.
+Customize the global hotkey and visual appearance.
 
 ```json
 {
     "hotkey": "Shift + Alt + .",
+    "FontSize": 10,
+    "LabelColor": "#00FF00",
+    "ValueColor": "#AAAA00",
+    "CategoryColor": "#777777",
     "WindowWidth": 600,
-    "WindowHeight": 400,
-    "WindowX": 100,
-    "WindowY": 100
+    "WindowHeight": 400
 }
 ```
-*Supported modifiers: `Ctrl`, `Alt`, `Shift`, `Win`.*
+*Supported modifiers: `Ctrl`, `Alt`, `Shift`, `Win`. Colors use standard Hex codes.*
 
 ## ⌨️ Usage
 

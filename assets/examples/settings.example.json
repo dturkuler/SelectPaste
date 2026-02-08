@@ -1,9 +1,15 @@
 {
     "hotkey": "Shift + Alt + .",
+    "FontSize": 10,
+    "LabelColor": "#00FF00",
+    "ValueColor": "#AAAA00",
+    "CategoryColor": "#777777",
+    "WindowWidth": 600,
+    "WindowHeight": 400,
     "_help": {
         "hotkey": "The global key combination to open the palette.",
-        "modifiers": "Ctrl, Alt, Shift, Win",
-        "keys": "A-Z, 0-9, F1-F12, and symbols (. , ; / [ ] Enter Space Tab Esc Backspace Delete)",
+        "FontSize": "Numeric font size for the palette items.",
+        "Colors": "Hex color codes (#RRGGBB) for different UI elements.",
         "examples": [
             "Ctrl + Shift + V",
             "Alt + Space",

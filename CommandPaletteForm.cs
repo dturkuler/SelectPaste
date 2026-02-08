@@ -162,11 +162,15 @@ namespace SelectPaste
 
         private void InitializeComponents()
         {
+            int padding = 10;
+            int headerHeight = 30;
+            int searchBoxHeight = (int)(settings.FontSize * 3); // Approx height for TextBox
+
             // Tabs Header
             tabHeaderPanel = new FlowLayoutPanel
             {
-                Location = new Point(10, 5),
-                Size = new Size(540, 30), 
+                Location = new Point(padding, 5),
+                Size = new Size(this.ClientSize.Width - padding - 25, headerHeight), 
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = false,
                 BackColor = Color.Transparent,
@@ -179,8 +183,8 @@ namespace SelectPaste
             closeButton = new Label
             {
                 Text = "X",
-                Location = new Point(570, 5),
-                Size = new Size(20, 20),
+                Location = new Point(this.ClientSize.Width - 20, 5),
+                Size = new Size(15, 20),
                 ForeColor = Color.IndianRed,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
                 Cursor = Cursors.Hand,
@@ -193,9 +197,9 @@ namespace SelectPaste
 
             searchBox = new TextBox
             {
-                Location = new Point(10, 40),
-                Width = 580,
-                Font = new Font("Segoe UI", 12),
+                Location = new Point(padding, 40),
+                Width = this.ClientSize.Width - (padding * 2),
+                Font = new Font("Segoe UI", settings.FontSize + 2),
                 BackColor = Color.FromArgb(50, 50, 50),
                 ForeColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
@@ -206,15 +210,18 @@ namespace SelectPaste
 
             resultMap = new ListBox
             {
-                Location = new Point(10, 80),
-                Width = 580,
-                Height = 310,
-                Font = new Font("Segoe UI", 10),
+                Location = new Point(padding, 80),
+                Width = this.ClientSize.Width - (padding * 2),
+                Height = this.ClientSize.Height - 80 - padding,
+                Font = new Font("Segoe UI", settings.FontSize),
                 BackColor = Color.FromArgb(40, 40, 40),
                 ForeColor = Color.LightGray,
                 BorderStyle = BorderStyle.None,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+                DrawMode = DrawMode.OwnerDrawFixed,
+                ItemHeight = (int)(settings.FontSize * 2)
             };
+            resultMap.DrawItem += ResultMap_DrawItem;
             resultMap.DoubleClick += ResultMap_DoubleClick;
             resultMap.KeyDown += ResultMap_KeyDown;
             resultMap.SelectedIndexChanged += ResultMap_SelectedIndexChanged;
@@ -223,6 +230,73 @@ namespace SelectPaste
             this.Controls.Add(closeButton);
             this.Controls.Add(searchBox);
             this.Controls.Add(resultMap);
+        }
+
+        private void ResultMap_DrawItem(object? sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+            
+            CommandItem? item = resultMap.Items[e.Index] as CommandItem;
+            if (item == null) return;
+
+            // Background
+            if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+            {
+                e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(60, 60, 60)), e.Bounds);
+            }
+            else
+            {
+                e.Graphics.FillRectangle(new SolidBrush(resultMap.BackColor), e.Bounds);
+            }
+
+            // Text Rendering
+            float x = e.Bounds.X + 5;
+            float y = e.Bounds.Y + (e.Bounds.Height - e.Font!.Height) / 2;
+
+            // 1. Category (Breadcrumb)
+            if (resultMap.DisplayMember == "FullDisplay" && !string.IsNullOrEmpty(item.GroupName))
+            {
+                string category = $"[{item.GroupName.ToUpper()}] ";
+                using (var brush = new SolidBrush(HexToColor(settings.CategoryColor)))
+                {
+                    e.Graphics.DrawString(category, e.Font, brush, x, y);
+                    x += e.Graphics.MeasureString(category, e.Font).Width;
+                }
+            }
+
+            // 2. Label
+            using (var brush = new SolidBrush(HexToColor(settings.LabelColor)))
+            {
+                e.Graphics.DrawString(item.label, e.Font, brush, x, y);
+                x += e.Graphics.MeasureString(item.label, e.Font).Width;
+            }
+
+            // 3. Separator " -> "
+            using (var brush = new SolidBrush(Color.DimGray))
+            {
+                string sep = " -> ";
+                e.Graphics.DrawString(sep, e.Font, brush, x, y);
+                x += e.Graphics.MeasureString(sep, e.Font).Width;
+            }
+
+            // 4. Value (Shortened)
+            using (var brush = new SolidBrush(HexToColor(settings.ValueColor)))
+            {
+                string shortVal = (item.value?.Length > 40) ? item.value.Substring(0, 37) + "..." : (item.value ?? "");
+                e.Graphics.DrawString(shortVal, e.Font, brush, x, y);
+            }
+        }
+
+        private Color HexToColor(string hex)
+        {
+            try
+            {
+                return ColorTranslator.FromHtml(hex);
+            }
+            catch
+            {
+                return Color.White;
+            }
         }
 
         #region Resizing and Moving Logic
@@ -428,8 +502,7 @@ namespace SelectPaste
                      
                      var filtered = allCommands.Where(c => 
                         c.label.ToLower().Contains(query) || 
-                        c.value.ToLower().Contains(query) ||
-                        c.GroupName.ToLower().Contains(query) // Contextual match
+                        c.value.ToLower().Contains(query)
                      )
                      .OrderByDescending(c => c.UsageCount) // Frequency Sort
                      .ThenBy(c => c.label.Length) // Shortest match first
