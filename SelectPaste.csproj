@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationIcon>assets\app.ico</ApplicationIcon>
     <Version>1.0.0</Version>
     <Authors>SelectPaste</Authors>
     <RepositoryUrl>https://github.com/dturkuler/SelectPaste</RepositoryUrl>
@@ -16,13 +16,19 @@
     <Content Include="commands.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="commands.example.json">
+    <Content Include="assets\examples\commands.example.json">
+      <Link>commands.example.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="settings.example.json">
+    <Content Include="assets\examples\settings.example.json">
+      <Link>settings.example.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\app.ico">
+      <Link>app.ico</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
