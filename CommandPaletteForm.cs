@@ -18,15 +18,16 @@ namespace SelectPaste
         public string GroupName { get; set; } = "";
         public int UsageCount { get; set; } = 0;
 
-        // Custom ToString to handle contextual breadcrumbs
+        // Custom ToString to handle contextual breadcrumbs and value preview
         public override string ToString()
         {
-            if (!string.IsNullOrEmpty(GroupName))
-            {
-                // Breadcrumb Format: [General] Example Command
-                return $"[{GroupName.ToUpper()}] {label}";
-            }
-            return label;
+            string groupPrefix = !string.IsNullOrEmpty(GroupName) ? $"[{GroupName.ToUpper()}] " : "";
+            
+            // Preview the value (shortened if too long)
+            string valuePreview = value ?? "";
+            if (valuePreview.Length > 40) valuePreview = valuePreview.Substring(0, 37) + "...";
+            
+            return $"{groupPrefix}{label} -> {valuePreview}";
         }
     }
 
