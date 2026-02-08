@@ -6,6 +6,8 @@
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+![SelectPaste Screenshot](assets/screenshot.png)
+
 SelectPaste is a lightweight utility designed to improve productivity by reducing repetitive typing. Trigger it with a global hotkey, search for your snippet, and paste it into any active application.
 
 ## Key Features
