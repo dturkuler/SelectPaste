@@ -9,8 +9,7 @@
     <ApplicationIcon>app.ico</ApplicationIcon>
     <Version>1.0.0</Version>
     <Authors>SelectPaste</Authors>
-    <Description>A keyboard-centric command palette for pasting text.</Description>
-    <RepositoryUrl>https://github.com/yourusername/SelectPaste</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dturkuler/SelectPaste</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
