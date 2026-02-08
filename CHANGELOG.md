@@ -5,16 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.5] - 2026-02-08
+### Added
+- **Conditional Breadcrumbs**: Category names (e.g., `[GIT]`) now appear instantly during global search but remain hidden when browsing specific tabs for a cleaner look.
+- **Value Visibility**: Search results now display a preview of the text snippet (`Label -> Value`) directly in the list.
+
+## [1.0.4] - 2026-02-08
+### Fixed
+- **Version Reporting**: Corrected a bug where the "About" dialog and startup popup incorrectly showed "1.0.0" instead of the current release version.
+
+## [1.0.3] - 2026-02-08
+### Added
+- **Frequency-Based Sorting**: The app now tracks how often you use specific commands. Your most frequent commands automatically "drift" to the top of results.
+- **Usage Statistics**: Added usage count tracking to the ToolTip information.
+
+## [1.0.1] - 2026-02-08
+### Changed
+- **Asset Restructuring**: Moved icons and example configurations to an `assets/` directory for better project organization.
+- **Self-Contained Deployment**: Improved release packaging for single-file executables.
 
 ## [1.0.0] - 2024-02-08
 ### Added
 - Initial release of SelectPaste.
-- **Tabbed Interface**: Organized commands into groups (General, Git, GSD).
+- **Tabbed Interface**: Organized commands into groups.
 - **Global Search**: Search across all command tabs instantly.
 - **System Tray Icon**: "SP" icon with context menu for Config and Quit.
 - **Configurable Hotkeys**: Global hotkey support via `settings.json`.
 - **JSON Configuration**: `commands.json` for managing snippets.
-- **Installer-free**: Portable single-file executable.
-- **Version Display**: "About" menu and startup popup showing version 1.0.0.
-\
+- **Portable**: Compiled as a self-contained single-file executable.
