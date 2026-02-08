@@ -8,6 +8,8 @@
 
 SelectPaste is a lightweight utility designed to improve productivity by reducing repetitive typing. Trigger it with a global hotkey, search for your snippet, and paste it into any active application.
 
+![alt text](assets/examples/screenshot.png)
+
 ## 🚀 Key Features
 
 *   **Global Hotkey**: Access your commands from anywhere (Default: `Shift + Alt + .`).
