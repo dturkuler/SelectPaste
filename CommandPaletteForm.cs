@@ -106,15 +106,33 @@ namespace SelectPaste
         
         public string SelectedValue { get; private set; } = "";
 
-        public CommandPaletteForm()
+        private Program.AppSettings settings;
+
+        public CommandPaletteForm(Program.AppSettings settings)
         {
+            this.settings = settings;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(600, 400); 
+            
+            // Restore Size
+            this.Size = new Size(settings.WindowWidth, settings.WindowHeight);
+            this.MinimumSize = new Size(300, 200); 
+
+            // Restore Position
+            if (settings.WindowX.HasValue && settings.WindowY.HasValue)
+            {
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = new Point(settings.WindowX.Value, settings.WindowY.Value);
+            }
+            else
+            {
+                this.StartPosition = FormStartPosition.CenterScreen;
+            }
+
             this.BackColor = Color.FromArgb(30, 30, 30);
             this.TopMost = true;
             this.ShowInTaskbar = false;
             this.KeyPreview = true; 
+            this.DoubleBuffered = true; 
 
             // Initialize Usage Manager
             usageManager = new UsageManager();
@@ -130,6 +148,16 @@ namespace SelectPaste
             LoadCommands();
             
             this.KeyDown += Form_KeyDown;
+            this.FormClosing += CommandPaletteForm_FormClosing;
+        }
+
+        private void CommandPaletteForm_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            // Update settings before closing
+            settings.WindowWidth = this.Width;
+            settings.WindowHeight = this.Height;
+            settings.WindowX = this.Location.X;
+            settings.WindowY = this.Location.Y;
         }
 
         private void InitializeComponents()
@@ -141,8 +169,11 @@ namespace SelectPaste
                 Size = new Size(540, 30), 
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = false,
-                BackColor = Color.Transparent
+                BackColor = Color.Transparent,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
+            // Allow dragging from header
+            tabHeaderPanel.MouseDown += (s, e) => { if (e.Button == MouseButtons.Left) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0); } };
 
             // Close Button "X"
             closeButton = new Label
@@ -153,7 +184,8 @@ namespace SelectPaste
                 ForeColor = Color.IndianRed,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
                 Cursor = Cursors.Hand,
-                TextAlign = ContentAlignment.MiddleCenter
+                TextAlign = ContentAlignment.MiddleCenter,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
             };
             closeButton.Click += (s, e) => CloseForm();
             closeButton.MouseEnter += (s, e) => closeButton.ForeColor = Color.Red;
@@ -166,7 +198,8 @@ namespace SelectPaste
                 Font = new Font("Segoe UI", 12),
                 BackColor = Color.FromArgb(50, 50, 50),
                 ForeColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle
+                BorderStyle = BorderStyle.FixedSingle,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
             searchBox.TextChanged += SearchBox_TextChanged;
             searchBox.KeyDown += SearchBox_KeyDown;
@@ -179,7 +212,8 @@ namespace SelectPaste
                 Font = new Font("Segoe UI", 10),
                 BackColor = Color.FromArgb(40, 40, 40),
                 ForeColor = Color.LightGray,
-                BorderStyle = BorderStyle.None
+                BorderStyle = BorderStyle.None,
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
             resultMap.DoubleClick += ResultMap_DoubleClick;
             resultMap.KeyDown += ResultMap_KeyDown;
@@ -190,6 +224,49 @@ namespace SelectPaste
             this.Controls.Add(searchBox);
             this.Controls.Add(resultMap);
         }
+
+        #region Resizing and Moving Logic
+        private const int WM_NCHITTEST = 0x84;
+        private const int HT_CLIENT = 0x1;
+        private const int HT_CAPTION = 0x2;
+        private const int HTLEFT = 10;
+        private const int HTRIGHT = 11;
+        private const int HTTOP = 12;
+        private const int HTTOPLEFT = 13;
+        private const int HTTOPRIGHT = 14;
+        private const int HTBOTTOM = 15;
+        private const int HTBOTTOMLEFT = 16;
+        private const int HTBOTTOMRIGHT = 17;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            if (m.Msg == WM_NCHITTEST)
+            {
+                Point pos = new Point(m.LParam.ToInt32());
+                pos = this.PointToClient(pos);
+
+                const int grip = 10; // Grip size for resizing 
+
+                if (pos.X <= grip && pos.Y <= grip) m.Result = (IntPtr)HTTOPLEFT;
+                else if (pos.X >= this.ClientSize.Width - grip && pos.Y <= grip) m.Result = (IntPtr)HTTOPRIGHT;
+                else if (pos.X <= grip && pos.Y >= this.ClientSize.Height - grip) m.Result = (IntPtr)HTBOTTOMLEFT;
+                else if (pos.X >= this.ClientSize.Width - grip && pos.Y >= this.ClientSize.Height - grip) m.Result = (IntPtr)HTBOTTOMRIGHT;
+                else if (pos.X <= grip) m.Result = (IntPtr)HTLEFT;
+                else if (pos.X >= this.ClientSize.Width - grip) m.Result = (IntPtr)HTRIGHT;
+                else if (pos.Y <= grip) m.Result = (IntPtr)HTTOP;
+                else if (pos.Y >= this.ClientSize.Height - grip) m.Result = (IntPtr)HTBOTTOM;
+                // Allow dragging window from the tab empty space
+                else if (pos.Y < 40) m.Result = (IntPtr)HT_CAPTION;
+            }
+        }
+        #endregion
 
         private void LoadCommands()
         {
@@ -351,7 +428,7 @@ namespace SelectPaste
                      
                      var filtered = allCommands.Where(c => 
                         c.label.ToLower().Contains(query) || 
-                        c.description.ToLower().Contains(query) ||
+                        c.value.ToLower().Contains(query) ||
                         c.GroupName.ToLower().Contains(query) // Contextual match
                      )
                      .OrderByDescending(c => c.UsageCount) // Frequency Sort

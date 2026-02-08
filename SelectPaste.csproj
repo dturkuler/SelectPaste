@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>assets\app.ico</ApplicationIcon>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Authors>SelectPaste</Authors>
     <RepositoryUrl>https://github.com/dturkuler/SelectPaste</RepositoryUrl>
   </PropertyGroup>

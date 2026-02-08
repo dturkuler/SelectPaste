@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace SelectPaste
 {
-    static class Program
+    public static class Program
     {
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -105,6 +105,23 @@ namespace SelectPaste
         public class AppSettings
         {
             public string hotkey { get; set; } = "Shift + Alt + ."; // Default
+            public int WindowWidth { get; set; } = 600;
+            public int WindowHeight { get; set; } = 400;
+            public int? WindowX { get; set; } = null;
+            public int? WindowY { get; set; } = null;
+        }
+
+        public static void SaveSettings(AppSettings settings)
+        {
+            try
+            {
+                string exePath = AppDomain.CurrentDomain.BaseDirectory;
+                string settingsPath = Path.Combine(exePath, "settings.json");
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(settingsPath, json);
+            }
+            catch { }
         }
 
         class HiddenContext : ApplicationContext
@@ -112,9 +129,11 @@ namespace SelectPaste
             private CommandPaletteForm? paletteForm;
             private InvisibleWindow? hotkeyWindow;
             private NotifyIcon trayIcon;
+            private AppSettings settings;
 
             public HiddenContext(AppSettings settings)
             {
+                this.settings = settings;
                 // Initialize Tray Icon
                 trayIcon = new NotifyIcon();
                 
@@ -167,7 +186,7 @@ namespace SelectPaste
             {
                 var version = Program.GetVersion();
                 var description = "A keyboard-centric command palette for pasting text.";
-                var repo = "https://github.com/yourusername/SelectPaste"; // Ideally read from assembly attributes
+                var repo = "https://github.com/dturkuler/SelectPaste"; // Ideally read from assembly attributes
                 
                 MessageBox.Show(
                     $"SelectPaste v{version}\n\n{description}\n\nRepository: {repo}",
@@ -247,10 +266,15 @@ namespace SelectPaste
             {
                 if (paletteForm == null || paletteForm.IsDisposed)
                 {
-                    paletteForm = new CommandPaletteForm();
+                    paletteForm = new CommandPaletteForm(settings);
                 }
 
-                if (paletteForm.ShowDialog() == DialogResult.OK)
+                DialogResult result = paletteForm.ShowDialog();
+                
+                // Save window state even if cancelled
+                Program.SaveSettings(settings);
+
+                if (result == DialogResult.OK)
                 {
                     string textToInject = paletteForm.SelectedValue;
                     if (!string.IsNullOrEmpty(textToInject))
