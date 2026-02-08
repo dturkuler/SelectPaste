@@ -1,25 +1,13 @@
 {
-    "hotkey": "Shift + Alt + ."
+    "hotkey": "Shift + Alt + .",
+    "_help": {
+        "hotkey": "The global key combination to open the palette.",
+        "modifiers": "Ctrl, Alt, Shift, Win",
+        "keys": "A-Z, 0-9, F1-F12, and symbols (. , ; / [ ] Enter Space Tab Esc Backspace Delete)",
+        "examples": [
+            "Ctrl + Shift + V",
+            "Alt + Space",
+            "Win + Z"
+        ]
+    }
 }
-/* 
-   SelectPaste Settings
-   ====================
-   
-   "hotkey": The global key combination to open the palette.
-   
-   Supported Modifiers:
-   - Ctrl
-   - Alt
-   - Shift
-   - Win
-   
-   Supported Keys:
-   - A-Z, 0-9
-   - F1-F12
-   - . , ; / [ ] Enter Space Tab Esc Backspace Delete
-   
-   Examples: 
-   "Ctrl + Shift + V"
-   "Alt + Space"
-   "Win + Z"
-*/
