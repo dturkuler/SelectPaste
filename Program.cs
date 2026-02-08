@@ -33,6 +33,7 @@ namespace SelectPaste
         [STAThread]
         static void Main()
         {
+            EnsureSingleInstance();
             ApplicationConfiguration.Initialize();
 
             // Load settings EARLY to get the hotkey string
@@ -84,6 +85,25 @@ namespace SelectPaste
             catch
             {
                 // Silent fail in production
+            }
+        }
+
+        private static void EnsureSingleInstance()
+        {
+            Process current = Process.GetCurrentProcess();
+            Process[] processes = Process.GetProcessesByName(current.ProcessName);
+            
+            foreach (Process process in processes)
+            {
+                if (process.Id != current.Id)
+                {
+                    try
+                    {
+                        process.Kill();
+                        process.WaitForExit(3000); // Wait up to 3 seconds for it to die
+                    }
+                    catch { }
+                }
             }
         }
 
