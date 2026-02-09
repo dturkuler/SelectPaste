@@ -2,7 +2,7 @@
 
 > A minimal, keyboard-centric command palette for Windows that lets you paste pre-defined text snippets instantly.
 
-![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -13,6 +13,8 @@ SelectPaste is a lightweight utility designed to improve productivity by reducin
 ## 🚀 Key Features
 
 *   **Global Hotkey**: Access your commands from anywhere (Default: `Shift + Alt + .`).
+*   **Favorites Tab**: Automatically generated group showing your most frequently used snippets.
+*   **Smart Scrolling Header**: Tabs automatically scroll into view as you navigate with arrow keys.
 *   **Resizable & Movable UI**: Drag the edges to resize or the header to move. The app **remembers your preferred layout** automatically.
 *   **Fully Customizable Styling**: Control font size and colors (labels, values, categories) directly via `settings.json`.
 *   **Frequency-Based Sorting**: The app learns your habits! Your most-used commands automatically move to the top of the search list.

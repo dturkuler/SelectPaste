@@ -96,7 +96,8 @@ namespace SelectPaste
     {
         private TextBox searchBox;
         private ListBox resultMap;
-        private FlowLayoutPanel tabHeaderPanel;
+        private Panel tabViewport; // Viewport to hide scrollbars
+        private FlowLayoutPanel tabHeaderPanel; // Content that scrolls
         private Label closeButton; 
         private ToolTip toolTip;
 
@@ -167,17 +168,30 @@ namespace SelectPaste
             int searchBoxHeight = (int)(settings.FontSize * 3); // Approx height for TextBox
 
             // Tabs Header
-            tabHeaderPanel = new FlowLayoutPanel
+            // Tabs Header Viewport (The "Window")
+            tabViewport = new Panel
             {
                 Location = new Point(padding, 5),
-                Size = new Size(this.ClientSize.Width - padding - 25, headerHeight), 
+                Size = new Size(this.ClientSize.Width - padding - 40, 30),
+                BackColor = Color.Transparent,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                AutoScroll = false // We handle scrolling manually
+            };
+
+            // Tabs Header Content (The actual tabs)
+            tabHeaderPanel = new FlowLayoutPanel
+            {
+                Location = Point.Empty,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = false,
-                BackColor = Color.Transparent,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                BackColor = Color.Transparent
             };
             // Allow dragging from header
+            tabViewport.MouseDown += (s, e) => { if (e.Button == MouseButtons.Left) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0); } };
             tabHeaderPanel.MouseDown += (s, e) => { if (e.Button == MouseButtons.Left) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0); } };
+            tabViewport.Controls.Add(tabHeaderPanel);
 
             // Close Button "X"
             closeButton = new Label
@@ -226,7 +240,7 @@ namespace SelectPaste
             resultMap.KeyDown += ResultMap_KeyDown;
             resultMap.SelectedIndexChanged += ResultMap_SelectedIndexChanged;
 
-            this.Controls.Add(tabHeaderPanel);
+            this.Controls.Add(tabViewport);
             this.Controls.Add(closeButton);
             this.Controls.Add(searchBox);
             this.Controls.Add(resultMap);
@@ -316,6 +330,11 @@ namespace SelectPaste
         public static extern bool ReleaseCapture();
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool ShowScrollBar(IntPtr hWnd, int wBar, bool bShow);
+        private const int SB_HORZ = 0;
+        private const int SB_VERT = 1;
+        private const int SB_BOTH = 3;
         private const int WM_NCLBUTTONDOWN = 0xA1;
 
         protected override void WndProc(ref Message m)
@@ -396,6 +415,34 @@ namespace SelectPaste
                     {
                          commandGroups.Add(new CommandGroup { name = "Empty", commands = new List<CommandItem>() });
                     }
+
+                    // --- Inject Favorites Group ---
+                    var allCommandsForFavs = commandGroups.SelectMany(g => g.commands).ToList();
+                    var favoriteCommands = allCommandsForFavs
+                        .Where(c => c.UsageCount > 0)
+                        .GroupBy(c => c.value) // Unique by value
+                        .Select(g => g.OrderByDescending(x => x.UsageCount).First())
+                        .OrderByDescending(c => c.UsageCount)
+                        .Take(15)
+                        .Select(c => new CommandItem { 
+                            label = c.label, 
+                            value = c.value, 
+                            description = c.description, 
+                            GroupName = c.GroupName, 
+                            UsageCount = c.UsageCount 
+                        }) // Create copies
+                        .ToList();
+
+                    if (favoriteCommands.Count > 0)
+                    {
+                        commandGroups.Insert(0, new CommandGroup 
+                        { 
+                            name = "Favorites", 
+                            description = "Most frequently used commands",
+                            commands = favoriteCommands 
+                        });
+                    }
+                    // ------------------------------
                     
                     SelectGroup(0);
                 }
@@ -434,6 +481,7 @@ namespace SelectPaste
             tabHeaderPanel.Controls.Clear();
             if (commandGroups.Count <= 1) return;
 
+            Label? activeLabel = null;
             for (int i = 0; i < commandGroups.Count; i++)
             {
                 var group = commandGroups[i];
@@ -461,6 +509,28 @@ namespace SelectPaste
                 }
 
                 tabHeaderPanel.Controls.Add(lbl);
+                if (i == currentGroupIndex) activeLabel = lbl;
+            }
+
+            tabHeaderPanel.PerformLayout();
+            if (activeLabel != null)
+            {
+                // Manual Scroll-into-view logic (Carousel)
+                int labelLeft = activeLabel.Left;
+                int labelRight = activeLabel.Right;
+                int viewportWidth = tabViewport.Width;
+                int currentScrollX = -tabHeaderPanel.Left;
+
+                if (labelLeft < currentScrollX)
+                {
+                    // Scroll Left to show label
+                    tabHeaderPanel.Left = -labelLeft;
+                }
+                else if (labelRight > currentScrollX + viewportWidth)
+                {
+                    // Scroll Right to show label
+                    tabHeaderPanel.Left = -(labelRight - viewportWidth);
+                }
             }
         }
 
