@@ -565,21 +565,24 @@ namespace SelectPaste
             }
             else
             {
-                 // Global Search across ALL groups
-                 if (commandGroups.Count > 0)
-                 {
-                     var allCommands = commandGroups.SelectMany(g => g.commands).ToList();
-                     
-                     var filtered = allCommands.Where(c => 
-                        c.label.ToLower().Contains(query) || 
-                        c.value.ToLower().Contains(query)
-                     )
-                     .OrderByDescending(c => c.UsageCount) // Frequency Sort
-                     .ThenBy(c => c.label.Length) // Shortest match first
-                     .ToList();
+                     // Global Search across ALL groups
+                     if (commandGroups.Count > 0)
+                     {
+                         var allCommands = commandGroups
+                            .Where(g => g.name != "Favorites") // Exclude duplicates
+                            .SelectMany(g => g.commands)
+                            .ToList();
+                         
+                         var filtered = allCommands.Where(c => 
+                            c.label.ToLower().Contains(query) || 
+                            c.value.ToLower().Contains(query)
+                         )
+                         .OrderByDescending(c => c.UsageCount) // Frequency Sort
+                         .ThenBy(c => c.label.Length) // Shortest match first
+                         .ToList();
 
-                     UpdateList(filtered, showBreadcrumbs: true);
-                 }
+                         UpdateList(filtered, showBreadcrumbs: true);
+                     }
             }
         }
         

@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-10
+### Fixed
+- **Duplicate Search Results**: Fixed a bug where global search would show duplicate entries by inadvertently searching through the generated "Favorites" group. Search now correctly filters unique commands from the original categories.
+
 ## [1.1.0] - 2026-02-10
 ### Added
 - **Dynamic Favorites Group**: A virtual "Favorites" category is now automatically created at startup. It displays your top 15 most-used commands across all groups, prioritized by usage frequency.
