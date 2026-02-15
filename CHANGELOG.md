@@ -1,9 +1,14 @@
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.2.2] - 2026-02-16
+### Added
+- **Settings Editor UI**: Integrated a new graphical settings editor to manage hotkeys, window dimensions, font sizes, and theme colors without manual JSON editing.
+- **Hotkey Recorder**: A dedicated field in settings that captures your key combinations automatically.
+- **Visual Color Picker**: Integrated a system color picker and live preview swatches for palette customization.
+- **TopMost Priority Handling**: Improved Z-order management to ensure the Settings Editor and Color Pickers always stay on top of the command palette.
+
+### Fixed
+- **Settings Visibility**: Fixed an issue where the settings window could be hidden behind the command palette in certain focus states.
 
 ## [1.2.1] - 2026-02-16
 ### Added
@@ -57,7 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.6] - 2026-02-08
 ### Added
+- A minimal, keyboard-centric command palette for Windows that lets you paste pre-defined text snippets instantly.
 - **Resizable Window**: The command palette is now resizable. Drag any edge or corner to adjust the size.
 - **Persistent Window State**: The app now remembers your custom window size and position across sessions.
 - **Draggable Header**: The palette can be moved by dragging the top tab area.
 - **Search Optimization**: Search now specifically targets labels and values, ignoring descriptions for cleaner results.
+```

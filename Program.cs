@@ -195,6 +195,9 @@ namespace SelectPaste
                 // Tray Menu
                 ContextMenuStrip menu = new ContextMenuStrip();
                 
+                ToolStripMenuItem settingsItem = new ToolStripMenuItem("Settings");
+                settingsItem.Click += (s, e) => ShowSettings();
+
                 ToolStripMenuItem configItem = new ToolStripMenuItem("Config Folder");
                 configItem.Click += (s, e) => Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory);
 
@@ -204,6 +207,7 @@ namespace SelectPaste
                 ToolStripMenuItem quitItem = new ToolStripMenuItem("Quit");
                 quitItem.Click += (s, e) => ExitApp();
 
+                menu.Items.Add(settingsItem);
                 menu.Items.Add(configItem);
                 menu.Items.Add(aboutItem);
                 menu.Items.Add(new ToolStripSeparator());
@@ -245,6 +249,32 @@ namespace SelectPaste
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
+            }
+
+            private void ShowSettings()
+            {
+                string oldHotkey = settings.hotkey;
+                var form = new SettingsForm(settings, (newSettings) => {
+                    // This is the Apply callback
+                    if (paletteForm != null && !paletteForm.IsDisposed)
+                    {
+                        paletteForm.RefreshTheme();
+                    }
+                    
+                    // Update hotkey if changed
+                    if (oldHotkey != newSettings.hotkey)
+                    {
+                        UnregisterHotKey(hotkeyWindow.Handle, HOTKEY_ID);
+                        (uint fsModifiers, uint vk) = ParseHotkey(newSettings.hotkey);
+                        if (!RegisterHotKey(hotkeyWindow.Handle, HOTKEY_ID, fsModifiers, vk))
+                        {
+                            MessageBox.Show($"Could not register hotkey '{newSettings.hotkey}'.");
+                        }
+                        oldHotkey = newSettings.hotkey;
+                        trayIcon.Text = $"SelectPaste ({settings.hotkey})";
+                    }
+                });
+                form.ShowDialog();
             }
 
             private void ExitApp()

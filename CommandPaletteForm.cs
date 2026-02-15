@@ -474,6 +474,13 @@ namespace SelectPaste
                                 value = "::MANAGE_COMMANDS::", 
                                 description = "Open the Command & Group Manager",
                                 GroupName = "System"
+                            },
+                            new CommandItem 
+                            { 
+                                label = "Settings", 
+                                value = "::SETTINGS::", 
+                                description = "Application configuration",
+                                GroupName = "System"
                             }
                         }
                     };
@@ -784,6 +791,13 @@ namespace SelectPaste
                     return;
                 }
 
+                if (SelectedValue == "::SETTINGS::")
+                {
+                    this.DialogResult = DialogResult.None;
+                    ShowSettings();
+                    return;
+                }
+
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -796,6 +810,43 @@ namespace SelectPaste
             {
                 LoadCommands(); // Refresh UI
             }
+        }
+
+        private void ShowSettings()
+        {
+            // We use the same context logic as Program.cs if possible, 
+            // but since palette is already open, we can just trigger it.
+            // However, Program.cs owns the RegisterHotKey and TrayIcon.
+            // Let's assume we can trigger the "ShowSettings" via a callback or just launch it here.
+            // Launching it here is simpler for layout/theme refresh.
+            
+            string oldHotkey = settings.hotkey;
+            var form = new SettingsForm(settings, (s) => {
+                RefreshTheme();
+                // Note: Hotkey update is handled by Program.cs if we can pass it up,
+                // but here we just need the UI to look right.
+            });
+            
+            if (form.ShowDialog(this) == DialogResult.OK)
+            {
+                // If hotkey changed, we might need to alert the user it requires app restart or handle it?
+                // Actually the Program.cs ShowSettings handles it.
+                // Let's just refresh theme for now.
+                RefreshTheme();
+            }
+        }
+
+        public void RefreshTheme()
+        {
+            this.Size = new Size(settings.WindowWidth, settings.WindowHeight);
+            
+            // Update fonts
+            searchBox.Font = new Font("Segoe UI", settings.FontSize + 2);
+            resultMap.Font = new Font("Segoe UI", settings.FontSize);
+            resultMap.ItemHeight = (int)(settings.FontSize * 2);
+
+            // Redraw list to apply colors
+            resultMap.Invalidate();
         }
 
         private void SwitchProfile()
