@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-02-16
+### Added
+- **Command & Group Manager**: Integrated a dedicated UI for adding, editing, deleting, and moving commands and groups, accessible via a new system command `::MANAGE_COMMANDS::`.
+- **Startup Visibility**: The application now launches with the Command Palette visible for immediate use after the initial welcome dialog.
+- **Scrollable Manager UI**: Added vertical scrollbars and optimized the layout of the command list in the manager for better navigation.
+
+### Fixed
+- **Deep Z-Order Handling**: Ensured management dialogs (Move To, Group Edit) correctly appear as TopMost above the palette to prevent window hiding.
+- **Form Layout Refinement**: Compacted the Value and Description fields in the editor to provide more space for the command list and groups.
+
 ## [1.2.0] - 2026-02-16
 ### Added
 - **Multiple Profiles**: Added support for switching between different command configuration files (e.g., `gsd.json`, `design.json`).
