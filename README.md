@@ -13,18 +13,23 @@ SelectPaste is a lightweight utility designed to improve productivity by reducin
 ## 🚀 Key Features
 
 *   **Global Hotkey**: Access your commands from anywhere (Default: `Shift + Alt + .`).
+*   **Settings Editor UI**: Manage hotkeys, window size, font size, and theme colors through a dedicated graphical interface. No manual JSON editing required.
+*   **Command & Group Manager**: Easily add, edit, or delete commands and groups directly from the palette.
+*   **Hotkey Recorder**: Easily set your preferred trigger combination by simply pressing it in the settings.
+*   **Visual Color Picker**: Customize the look and feel of your palette with live color previews and a system color dialog.
 *   **Favorites Tab**: Automatically generated group showing your most frequently used snippets.
 *   **Smart Scrolling Header**: Tabs automatically scroll into view as you navigate with arrow keys.
 *   **Resizable & Movable UI**: Drag the edges to resize or the header to move. The app **remembers your preferred layout** automatically.
-*   **Fully Customizable Styling**: Control font size and colors (labels, values, categories) directly via `settings.json`.
+*   **Fully Customizable Styling**: Control font size and colors (labels, values, categories) with real-time application of changes.
 *   **Frequency-Based Sorting**: The app learns your habits! Your most-used commands automatically move to the top of the search list.
 *   **Intelligent Search**:
     *   **Tabbed Browsing**: View specific groups (General, Git, Emails) in a clean list.
     *   **Contextual Breadcrumbs**: When searching globally, items are marked with their category (e.g., `[GIT]`) so you know exactly what you're pasting.
 *   **Value Preview**: See a preview of the text snippet (`Label -> Value`) right in the search results with custom coloring.
-*   **System Tray Integration**: Runs silently in the background with quick access to configuration and controls.
+*   **System Tray Integration**: Quick access to **Settings**, Config Folder, and About from the notification area.
 *   **Portable & Reliable**: No installation required. Just run the `.exe` and it works.
 *   **Multiple Profiles**: Support for multiple command sets (e.g., `gsd.json`, `work.json`). Use the `Switch Profile` command to toggle between them.
+*   **System Commands**: Built-in commands prefix with `::` (e.g., `::SETTINGS::`, `::MANAGE_COMMANDS::`, `::SWITCH_PROFILE::`) for core management.
 
 ## 📦 Installation
 
@@ -35,52 +40,45 @@ SelectPaste is a lightweight utility designed to improve productivity by reducin
 *Note: On first run, a popup will confirm you want to run the application in the background.*
 
 ## ⚙️ Configuration
+SelectPaste is designed to be configured entirely through its graphical interface, though you can still edit JSON files manually if preferred.
 
-SelectPaste uses simple JSON files located in the same directory as the executable.
+### 1. Graphical Editors
+- **Settings Editor**: Access via the system tray or the `::SETTINGS::` command. Change hotkeys, window size, and colors with a live preview.
+- **Command & Group Manager**: Access via the `::MANAGE_COMMANDS::` command in the palette. Manage your snippets without touching code.
 
-### 1. Commands (`commands.json`)
+### 2. Manual Configuration (Optional)
+Files are located in the same directory as the executable.
 
+#### Commands (`commands.json`)
 Define your snippets here. Structure is a list of groups, each containing a list of commands.
-
 ```json
 [
   {
     "name": "General",
     "commands": [
-      { 
-        "label": "My Email", 
-        "value": "user@example.com", 
-        "description": "Pastes my work email" 
-      }
+      { "label": "My Email", "value": "user@example.com", "description": "Pastes my work email" }
     ]
   }
 ]
 ```
 
-```
-
-### 3. Multiple Profiles
-
-You can create multiple command files (e.g., `work.json`, `personal.json`).
-- **To Switch**: Open the palette and select `Switch Profile`.
-- **Usage Stats**: Each profile maintains its own usage history (e.g., `work_usage.json`).
-
-### 2. Settings (`settings.json`)
-
+#### Settings (`settings.json`)
 Customize the global hotkey and visual appearance.
-
 ```json
 {
     "hotkey": "Shift + Alt + .",
     "FontSize": 10,
-    "LabelColor": "#00FF00",
-    "ValueColor": "#AAAA00",
-    "CategoryColor": "#777777",
-    "WindowWidth": 600,
-    "WindowHeight": 400
+    "LabelColor": "#FFFFFF",
+    "ValueColor": "#888888",
+    "CategoryColor": "#FFA500"
 }
 ```
 *Supported modifiers: `Ctrl`, `Alt`, `Shift`, `Win`. Colors use standard Hex codes.*
+
+### 3. Multiple Profiles
+You can create multiple command files (e.g., `work.json`, `personal.json`).
+- **To Switch**: Open the palette and select `Switch Profile` (or type `::SWITCH_PROFILE::`).
+- **Usage Stats**: Each profile maintains its own usage history (e.g., `work_usage.json`).
 
 ## ⌨️ Usage
 
