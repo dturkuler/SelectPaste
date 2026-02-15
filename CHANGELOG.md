@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-02-16
+### Fixed
+- **Sorting Logic**: Ensure "Most Used" sorting applies only to the "Favorites" tab. All other tabs are now sorted alphabetically by label for easier scanning.
+
 ## [1.1.1] - 2026-02-10
 ### Fixed
 - **Duplicate Search Results**: Fixed a bug where global search would show duplicate entries by inadvertently searching through the generated "Favorites" group. Search now correctly filters unique commands from the original categories.

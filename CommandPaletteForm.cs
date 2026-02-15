@@ -466,11 +466,21 @@ namespace SelectPaste
                 searchBox.Text = ""; 
             }
             
-            // When selecting a specific group tab, sort by Usage, but keep it deterministic
-            var sortedCommands = commandGroups[currentGroupIndex].commands
-                .OrderByDescending(c => c.UsageCount)
-                .ThenBy(c => c.label)
-                .ToList();
+            // Sort by Usage only for Favorites, otherwise Alphabetical
+            List<CommandItem> sortedCommands;
+            if (commandGroups[currentGroupIndex].name == "Favorites")
+            {
+                sortedCommands = commandGroups[currentGroupIndex].commands
+                    .OrderByDescending(c => c.UsageCount)
+                    .ThenBy(c => c.label)
+                    .ToList();
+            }
+            else
+            {
+                sortedCommands = commandGroups[currentGroupIndex].commands
+                    .OrderBy(c => c.label)
+                    .ToList();
+            }
 
             UpdateList(sortedCommands, showBreadcrumbs: false); // No need for "GIT > Push" inside Git tab
             searchBox.Focus(); 
@@ -557,9 +567,20 @@ namespace SelectPaste
                 // Reset to current group view
                 if (commandGroups.Count > 0)
                 {
-                    var groupCmds = commandGroups[currentGroupIndex].commands
-                        .OrderByDescending(c => c.UsageCount)
-                        .ToList();
+                    List<CommandItem> groupCmds;
+                    if (commandGroups[currentGroupIndex].name == "Favorites")
+                    {
+                        groupCmds = commandGroups[currentGroupIndex].commands
+                            .OrderByDescending(c => c.UsageCount)
+                            .ThenBy(c => c.label)
+                            .ToList();
+                    }
+                    else
+                    {
+                        groupCmds = commandGroups[currentGroupIndex].commands
+                            .OrderBy(c => c.label)
+                            .ToList();
+                    }
                     UpdateList(groupCmds, showBreadcrumbs: false);
                 }
             }
