@@ -80,7 +80,7 @@ namespace SelectPaste
             
             try 
             {
-                Application.Run(new HiddenContext(settings));
+                Application.Run(new HiddenContext(settings, !silent));
             }
             catch
             {
@@ -172,7 +172,7 @@ namespace SelectPaste
             private NotifyIcon trayIcon;
             private AppSettings settings;
 
-            public HiddenContext(AppSettings settings)
+            public HiddenContext(AppSettings settings, bool startWithPalette = false)
             {
                 this.settings = settings;
                 // Initialize Tray Icon
@@ -220,6 +220,16 @@ namespace SelectPaste
                 {
                     int err = Marshal.GetLastWin32Error();
                     MessageBox.Show($"Could not register hotkey '{settings.hotkey}' (Error {err}).\nCheck settings.json.");
+                }
+                if (startWithPalette)
+                {
+                    System.Windows.Forms.Timer startTimer = new System.Windows.Forms.Timer { Interval = 100 };
+                    startTimer.Tick += (s, e) => {
+                        startTimer.Stop();
+                        startTimer.Dispose();
+                        ShowPalette();
+                    };
+                    startTimer.Start();
                 }
             }
 

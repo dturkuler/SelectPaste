@@ -101,9 +101,9 @@ namespace SelectPaste
         private Label closeButton; 
         private ToolTip toolTip;
 
-        private List<CommandGroup> commandGroups = new List<CommandGroup>();
+        internal List<CommandGroup> commandGroups = new List<CommandGroup>();
         private int currentGroupIndex = 0;
-        private UsageManager usageManager;
+        internal UsageManager usageManager;
         
         public string SelectedValue { get; private set; } = "";
 
@@ -113,7 +113,6 @@ namespace SelectPaste
         {
             this.settings = settings;
             this.FormBorderStyle = FormBorderStyle.None;
-            
             // Restore Size
             this.Size = new Size(settings.WindowWidth, settings.WindowHeight);
             this.MinimumSize = new Size(300, 200); 
@@ -468,6 +467,13 @@ namespace SelectPaste
                                 value = "::SWITCH_PROFILE::", 
                                 description = $"Current: {settings.CommandFile}",
                                 GroupName = "System"
+                            },
+                            new CommandItem 
+                            { 
+                                label = "Manage Commands", 
+                                value = "::MANAGE_COMMANDS::", 
+                                description = "Open the Command & Group Manager",
+                                GroupName = "System"
                             }
                         }
                     };
@@ -503,13 +509,13 @@ namespace SelectPaste
             {
                 sortedCommands = commandGroups[currentGroupIndex].commands
                     .OrderByDescending(c => c.UsageCount)
-                    .ThenBy(c => c.label)
+                    .ThenBy(c => c.label, StringComparer.OrdinalIgnoreCase) // Case-insensitive alphabetical tie-breaker
                     .ToList();
             }
             else
             {
                 sortedCommands = commandGroups[currentGroupIndex].commands
-                    .OrderBy(c => c.label)
+                    .OrderBy(c => c.label, StringComparer.OrdinalIgnoreCase) // Case-insensitive alphabetical
                     .ToList();
             }
 
@@ -625,18 +631,18 @@ namespace SelectPaste
                             .SelectMany(g => g.commands)
                             .ToList();
                          
-                         var filtered = allCommands.Where(c => 
-                            c.label.ToLower().Contains(query) || 
-                            c.value.ToLower().Contains(query)
-                         )
-                         .OrderByDescending(c => c.UsageCount) // Frequency Sort
-                         .ThenBy(c => c.label.Length) // Shortest match first
-                         .ToList();
+                          var filtered = allCommands.Where(c => 
+                             c.label.ToLower().Contains(query) || 
+                             c.value.ToLower().Contains(query)
+                          )
+                          .OrderByDescending(c => c.UsageCount) // Frequency Sort
+                          .ThenBy(c => c.label, StringComparer.OrdinalIgnoreCase) // Case-insensitive alphabetical
+                          .ToList();
 
-                         UpdateList(filtered, showBreadcrumbs: true);
-                     }
-            }
-        }
+                          UpdateList(filtered, showBreadcrumbs: true);
+                      }
+             }
+         }
         
         private void ResultMap_SelectedIndexChanged(object? sender, EventArgs e)
         {
@@ -763,22 +769,32 @@ namespace SelectPaste
                 usageManager.Increment(item.value);
                 
                 SelectedValue = item.value;
-                this.DialogResult = DialogResult.OK;
                 
                 if (SelectedValue == "::SWITCH_PROFILE::")
                 {
-                    // Handle Profile Switching
+                    this.DialogResult = DialogResult.None;
                     SwitchProfile();
-                    // Don't close immediately if we want to show the new profile, 
-                    // but for now let's just close and let the main loop re-open if needed? 
-                    // Actually, the main loop injects text. 
-                    // We need to prevent injection if it's a system command.
-                    this.DialogResult = DialogResult.None; // Stay open or handle differently?
-                    // Re-load commands and stay open?
                     return;
                 }
 
+                if (SelectedValue == "::MANAGE_COMMANDS::")
+                {
+                    this.DialogResult = DialogResult.None;
+                    ShowManager();
+                    return;
+                }
+
+                this.DialogResult = DialogResult.OK;
                 this.Close();
+            }
+        }
+
+        private void ShowManager()
+        {
+            var manager = new CommandManagerForm(this, settings);
+            if (manager.ShowDialog(this) == DialogResult.OK)
+            {
+                LoadCommands(); // Refresh UI
             }
         }
 
