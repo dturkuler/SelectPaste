@@ -2,7 +2,7 @@
 
 > A minimal, keyboard-centric command palette for Windows that lets you paste pre-defined text snippets instantly.
 
-![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -24,6 +24,7 @@ SelectPaste is a lightweight utility designed to improve productivity by reducin
 *   **Value Preview**: See a preview of the text snippet (`Label -> Value`) right in the search results with custom coloring.
 *   **System Tray Integration**: Runs silently in the background with quick access to configuration and controls.
 *   **Portable & Reliable**: No installation required. Just run the `.exe` and it works.
+*   **Multiple Profiles**: Support for multiple command sets (e.g., `gsd.json`, `work.json`). Use the `Switch Profile` command to toggle between them.
 
 ## 📦 Installation
 
@@ -55,6 +56,14 @@ Define your snippets here. Structure is a list of groups, each containing a list
   }
 ]
 ```
+
+```
+
+### 3. Multiple Profiles
+
+You can create multiple command files (e.g., `work.json`, `personal.json`).
+- **To Switch**: Open the palette and select `Switch Profile`.
+- **Usage Stats**: Each profile maintains its own usage history (e.g., `work_usage.json`).
 
 ### 2. Settings (`settings.json`)
 

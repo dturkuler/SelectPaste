@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-16
+### Added
+- **Multiple Profiles**: Added support for switching between different command configuration files (e.g., `gsd.json`, `design.json`).
+- **Profile Switcher**: New built-in "Switch Profile" command to easily change the active command set.
+- **Per-Profile Usage Stats**: Usage statistics are now tracked separately for each profile (e.g., `gsd_usage.json`).
+
 ## [1.1.2] - 2026-02-16
 ### Fixed
 - **Sorting Logic**: Ensure "Most Used" sorting applies only to the "Favorites" tab. All other tabs are now sorted alphabetically by label for easier scanning.
