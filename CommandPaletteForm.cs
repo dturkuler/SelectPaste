@@ -40,9 +40,9 @@ namespace SelectPaste
         private string filePath;
         private Dictionary<string, int> usageStats;
 
-        public UsageManager()
+        public UsageManager(string usageFilePath)
         {
-            filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "usage.json");
+            filePath = usageFilePath;
             Load();
         }
 
@@ -135,8 +135,20 @@ namespace SelectPaste
             this.KeyPreview = true; 
             this.DoubleBuffered = true; 
 
-            // Initialize Usage Manager
-            usageManager = new UsageManager();
+            // Initialize Usage Manager with checking existing setting
+            string exePath = AppDomain.CurrentDomain.BaseDirectory;
+            // Determine usage file name based on command file
+            // Convention: [name].json -> [name]_usage.json
+            string commandFile = settings.CommandFile;
+            string usageFile = "usage.json"; // Default fallback
+            
+            if (commandFile.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                 string baseName = Path.GetFileNameWithoutExtension(commandFile);
+                 usageFile = $"{baseName}_usage.json";
+            }
+            
+            usageManager = new UsageManager(Path.Combine(exePath, usageFile));
 
             // Initialize ToolTip
             toolTip = new ToolTip();
@@ -367,7 +379,7 @@ namespace SelectPaste
             {
                 // Ensure we read from the executable's directory
                 string exePath = AppDomain.CurrentDomain.BaseDirectory;
-                string commandsPath = Path.Combine(exePath, "commands.json");
+                string commandsPath = Path.Combine(exePath, settings.CommandFile);
 
                 if (File.Exists(commandsPath))
                 {
@@ -442,6 +454,25 @@ namespace SelectPaste
                             commands = favoriteCommands 
                         });
                     }
+
+                    // --- Inject Profile Switcher ---
+                    // Helper command to switch profiles
+                    var systemGroup = new CommandGroup 
+                    { 
+                        name = "System", 
+                        commands = new List<CommandItem> 
+                        {
+                            new CommandItem 
+                            { 
+                                label = "Switch Profile", 
+                                value = "::SWITCH_PROFILE::", 
+                                description = $"Current: {settings.CommandFile}",
+                                GroupName = "System"
+                            }
+                        }
+                    };
+                    commandGroups.Add(systemGroup);
+                    // ------------------------------
                     // ------------------------------
                     
                     SelectGroup(0);
@@ -704,13 +735,86 @@ namespace SelectPaste
         {
             if (resultMap.SelectedItem is CommandItem item)
             {
+                if (item.value.StartsWith("::LOAD_PROFILE::"))
+                {
+                    string newProfile = item.value.Replace("::LOAD_PROFILE::", "");
+                    settings.CommandFile = newProfile;
+                    // Do NOT save settings here? Or should we?
+                    // Program.SaveSettings(settings); // Maybe save so it persists
+                    
+                    // Reload everything
+                    // Re-init Usage Manager
+                    string exePath = AppDomain.CurrentDomain.BaseDirectory;
+                    string usageFile = "usage.json";
+                    if (newProfile.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                    {
+                         string baseName = Path.GetFileNameWithoutExtension(newProfile);
+                         usageFile = $"{baseName}_usage.json";
+                    }
+                    usageManager = new UsageManager(Path.Combine(exePath, usageFile));
+                    
+                    LoadCommands();
+                    searchBox.Text = "";
+                    searchBox.Focus();
+                    return;
+                }
+
                 // Track Usage!
                 usageManager.Increment(item.value);
                 
                 SelectedValue = item.value;
                 this.DialogResult = DialogResult.OK;
+                
+                if (SelectedValue == "::SWITCH_PROFILE::")
+                {
+                    // Handle Profile Switching
+                    SwitchProfile();
+                    // Don't close immediately if we want to show the new profile, 
+                    // but for now let's just close and let the main loop re-open if needed? 
+                    // Actually, the main loop injects text. 
+                    // We need to prevent injection if it's a system command.
+                    this.DialogResult = DialogResult.None; // Stay open or handle differently?
+                    // Re-load commands and stay open?
+                    return;
+                }
+
                 this.Close();
             }
+        }
+
+        private void SwitchProfile()
+        {
+            string exePath = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = Directory.GetFiles(exePath, "*.json");
+            
+            var profiles = new List<CommandItem>();
+            foreach (var file in candidates)
+            {
+                string filename = Path.GetFileName(file);
+                // Filter out non-command files
+                if (filename.Equals("settings.json", StringComparison.OrdinalIgnoreCase)) continue;
+                if (filename.EndsWith("_usage.json", StringComparison.OrdinalIgnoreCase)) continue;
+                if (filename.EndsWith(".deps.json", StringComparison.OrdinalIgnoreCase)) continue;
+                if (filename.EndsWith(".runtimeconfig.json", StringComparison.OrdinalIgnoreCase)) continue;
+                if (filename.EndsWith(".sourcelink.json", StringComparison.OrdinalIgnoreCase)) continue;
+                
+                profiles.Add(new CommandItem 
+                { 
+                    label = filename, 
+                    value = $"::LOAD_PROFILE::{filename}", 
+                    description = "Load this command profile",
+                    GroupName = "Profiles"
+                });
+            }
+
+            // Temporarily replace the list with profiles
+            // We can just show them in the list box
+            UpdateList(profiles, showBreadcrumbs: false);
+            searchBox.Text = ""; // Clear search
+            searchBox.Focus();
+            
+            // Hack: Hijack the selection logic for the next enter
+            // We need to change the state or just handle ::LOAD_PROFILE:: in ConfirmSelection
         }
         
         private void Form_KeyDown(object? sender, KeyEventArgs e)

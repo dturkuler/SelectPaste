@@ -137,6 +137,9 @@ namespace SelectPaste
             public string LabelColor { get; set; } = "#FFFFFF";    // White
             public string ValueColor { get; set; } = "#888888";    // Gray
             public string CategoryColor { get; set; } = "#FFA500"; // Orange
+            
+            // Command Profile
+            public string CommandFile { get; set; } = "commands.json";
 
             // Preserve unknown fields (like _help)
             [JsonExtensionData]

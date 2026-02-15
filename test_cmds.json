@@ -1,0 +1,15 @@
+[
+    {
+        "name": "Test Group",
+        "commands": [
+            {
+                "label": "Test Command 1",
+                "value": "Test 1"
+            },
+            {
+                "label": "Test Command 2",
+                "value": "Test 2"
+            }
+        ]
+    }
+]
