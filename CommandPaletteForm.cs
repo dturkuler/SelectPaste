@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Text.Json;
 using System.IO;
+using System.Text.Encodings.Web;
+using System.Text.Json.Serialization;
 
 namespace SelectPaste
 {
@@ -14,12 +16,17 @@ namespace SelectPaste
         public string value { get; set; } = "";
         public string description { get; set; } = ""; 
         
-        // Metadata for display/sorting
+        // Metadata for display/sorting (Runtime only)
+        [JsonIgnore]
         public string GroupName { get; set; } = "";
+        
         public int UsageCount { get; set; } = 0;
 
-        // Formatted properties for ListBox DisplayMember
+        // Formatted properties for ListBox DisplayMember (Runtime only)
+        [JsonIgnore]
         public string FullDisplay => $"[{GroupName.ToUpper()}] {label} -> {ShortValue}";
+        
+        [JsonIgnore]
         public string TabDisplay => $"{label} -> {ShortValue}";
 
         private string ShortValue => (value?.Length > 40) ? value.Substring(0, 37) + "..." : (value ?? "");
@@ -34,63 +41,6 @@ namespace SelectPaste
         public List<CommandItem> commands { get; set; } = new List<CommandItem>();
     }
 
-    // New class to handle usage statistics
-    public class UsageManager
-    {
-        private string filePath;
-        private Dictionary<string, int> usageStats;
-
-        public UsageManager(string usageFilePath)
-        {
-            filePath = usageFilePath;
-            Load();
-        }
-
-        private void Load()
-        {
-            if (File.Exists(filePath))
-            {
-                try
-                {
-                    string json = File.ReadAllText(filePath);
-                    usageStats = JsonSerializer.Deserialize<Dictionary<string, int>>(json) ?? new Dictionary<string, int>();
-                }
-                catch
-                {
-                    usageStats = new Dictionary<string, int>();
-                }
-            }
-            else
-            {
-                usageStats = new Dictionary<string, int>();
-            }
-        }
-
-        public void Increment(string commandValue)
-        {
-            if (usageStats.ContainsKey(commandValue))
-                usageStats[commandValue]++;
-            else
-                usageStats[commandValue] = 1;
-
-            Save();
-        }
-
-        public int GetUsage(string commandValue)
-        {
-            return usageStats.ContainsKey(commandValue) ? usageStats[commandValue] : 0;
-        }
-
-        private void Save()
-        {
-            try
-            {
-                string json = JsonSerializer.Serialize(usageStats);
-                File.WriteAllText(filePath, json);
-            }
-            catch { }
-        }
-    }
 
     public class CommandPaletteForm : Form
     {
@@ -103,7 +53,6 @@ namespace SelectPaste
 
         internal List<CommandGroup> commandGroups = new List<CommandGroup>();
         private int currentGroupIndex = 0;
-        internal UsageManager usageManager;
         
         public string SelectedValue { get; private set; } = "";
 
@@ -133,21 +82,6 @@ namespace SelectPaste
             this.ShowInTaskbar = false;
             this.KeyPreview = true; 
             this.DoubleBuffered = true; 
-
-            // Initialize Usage Manager with checking existing setting
-            string exePath = AppDomain.CurrentDomain.BaseDirectory;
-            // Determine usage file name based on command file
-            // Convention: [name].json -> [name]_usage.json
-            string commandFile = settings.CommandFile;
-            string usageFile = "usage.json"; // Default fallback
-            
-            if (commandFile.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-            {
-                 string baseName = Path.GetFileNameWithoutExtension(commandFile);
-                 usageFile = $"{baseName}_usage.json";
-            }
-            
-            usageManager = new UsageManager(Path.Combine(exePath, usageFile));
 
             // Initialize ToolTip
             toolTip = new ToolTip();
@@ -394,7 +328,6 @@ namespace SelectPaste
                             foreach (var cmd in group.commands)
                             {
                                 cmd.GroupName = group.name; // Set Context
-                                cmd.UsageCount = usageManager.GetUsage(cmd.value); // Load Usage
                             }
                         }
 
@@ -417,7 +350,6 @@ namespace SelectPaste
                             foreach (var cmd in group.commands)
                             {
                                 cmd.GroupName = "General";
-                                cmd.UsageCount = usageManager.GetUsage(cmd.value);
                             }
                         }
                     }
@@ -756,16 +688,6 @@ namespace SelectPaste
                     // Program.SaveSettings(settings); // Maybe save so it persists
                     
                     // Reload everything
-                    // Re-init Usage Manager
-                    string exePath = AppDomain.CurrentDomain.BaseDirectory;
-                    string usageFile = "usage.json";
-                    if (newProfile.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-                    {
-                         string baseName = Path.GetFileNameWithoutExtension(newProfile);
-                         usageFile = $"{baseName}_usage.json";
-                    }
-                    usageManager = new UsageManager(Path.Combine(exePath, usageFile));
-                    
                     LoadCommands();
                     searchBox.Text = "";
                     searchBox.Focus();
@@ -773,7 +695,8 @@ namespace SelectPaste
                 }
 
                 // Track Usage!
-                usageManager.Increment(item.value);
+                item.UsageCount++;
+                SaveCommands();
                 
                 SelectedValue = item.value;
                 
@@ -801,6 +724,30 @@ namespace SelectPaste
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
+        }
+
+        internal void SaveCommands()
+        {
+            try
+            {
+                string exePath = AppDomain.CurrentDomain.BaseDirectory;
+                string commandsPath = Path.Combine(exePath, settings.CommandFile);
+                
+                // Exclude Favorites/System groups from persistent storage
+                var persistentGroups = commandGroups
+                    .Where(g => g.name != "Favorites" && g.name != "System")
+                    .ToList();
+
+                var options = new JsonSerializerOptions 
+                { 
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                
+                string json = JsonSerializer.Serialize(persistentGroups, options);
+                File.WriteAllText(commandsPath, json);
+            }
+            catch { }
         }
 
         private void ShowManager()

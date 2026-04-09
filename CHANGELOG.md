@@ -1,5 +1,10 @@
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2026-04-09
+### Changed
+- **Unified Usage Stats**: Consolidated command usage statistics directly into the command configuration files (e.g., `commands.json`). Usage is now tracked via the `UsageCount` field within the main profiles, removing the need for separate `*_usage.json` files.
+- **Code Refactor**: Unified JSON serialization settings and command persistence logic into a centralized `SaveCommands` method.
+
 ## [1.2.2] - 2026-02-16
 ### Added
 - **Settings Editor UI**: Integrated a new graphical settings editor to manage hotkeys, window dimensions, font sizes, and theme colors without manual JSON editing.

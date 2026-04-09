@@ -465,31 +465,8 @@ namespace SelectPaste
 
         private void SaveAndRefresh()
         {
-            try
-            {
-                string exePath = AppDomain.CurrentDomain.BaseDirectory;
-                string commandsPath = Path.Combine(exePath, settings.CommandFile);
-                
-                // Exclude system/favorites from persistent storage
-                var persistentGroups = paletteForm.commandGroups
-                    .Where(g => g.name != "Favorites" && g.name != "System")
-                    .ToList();
-
-                var options = new JsonSerializerOptions 
-                { 
-                    WriteIndented = true,
-                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                };
-                
-                string json = JsonSerializer.Serialize(persistentGroups, options);
-                File.WriteAllText(commandsPath, json);
-                
-                hasChanges = true; // Mark as changed for later reload
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to save: " + ex.Message);
-            }
+            paletteForm.SaveCommands();
+            hasChanges = true; // Mark as changed for later reload
         }
     }
 

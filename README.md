@@ -2,7 +2,7 @@
 
 > A minimal, keyboard-centric command palette for Windows that lets you paste pre-defined text snippets instantly.
 
-![Version](https://img.shields.io/badge/version-1.2.2-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.3-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -78,7 +78,7 @@ Customize the global hotkey and visual appearance.
 ### 3. Multiple Profiles
 You can create multiple command files (e.g., `work.json`, `personal.json`).
 - **To Switch**: Open the palette and select `Switch Profile` (or type `::SWITCH_PROFILE::`).
-- **Usage Stats**: Each profile maintains its own usage history (e.g., `work_usage.json`).
+- **Usage Stats**: Each profile maintains its own usage data directly within its configuration file.
 
 ## ⌨️ Usage
 
